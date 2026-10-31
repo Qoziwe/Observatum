@@ -393,23 +393,10 @@
         </form>
     </main>
 
-    <script>
+        <script>
         (function() {
-            const savedTheme = "dark";
-            document.documentElement.setAttribute("data-theme", savedTheme);
-            const themeBtn = document.getElementById("themeBtn");
-            themeBtn.textContent = savedTheme === "dark" ? "Theme: Dark" : "Theme: Light";
-            themeBtn.addEventListener("click", function() {
-                const cur = document.documentElement.getAttribute("data-theme");
-                const next = cur === "dark" ? "light" : "dark";
-                document.documentElement.setAttribute("data-theme", next);
-                localStorage.setItem("observatum_bento_theme", next);
-                themeBtn.textContent = next === "dark" ? "Theme: Dark" : "Theme: Light";
-            });
-
             const form = document.getElementById("surveyForm");
             const submitBtn = document.getElementById("submitBtn");
-            const dgccBanner = document.getElementById("dgccGateBanner");
             const errorBanner = document.getElementById("errorBanner");
             const progressBar = document.getElementById("progressBar");
             const completionCounter = document.getElementById("completionCounter");
@@ -420,7 +407,6 @@
             const resetFormBtn = document.getElementById("resetFormBtn");
 
             const radioGroups = [
-                
                 "q3_occupation",
                 "q4_area",
                 "q5_mobile_provider",
@@ -441,65 +427,57 @@
             ];
 
             function getCheckedValues(name) {
-                return Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+                return Array.from(form.querySelectorAll('input[name="' + name + '"]:checked')).map(function(el) { return el.value; });
             }
 
             function getRadioValue(name) {
-                const el = form.querySelector(`input[name="${name}"]:checked`);
+                const el = form.querySelector('input[name="' + name + '"]:checked');
                 return el ? el.value : "";
             }
 
-            function updateProgressAndGates() {
+            function updateProgress() {
                 let done = 0;
-                const q1Val = document.getElementById("q1_participant_id").value.trim();
+                const q1Input = document.getElementById("q1_participant_id");
+                const q1Val = q1Input ? q1Input.value.trim() : "";
                 if (q1Val.length >= 2) done += 1;
 
-                radioGroups.forEach(name => {
+                radioGroups.forEach(function(name) {
                     if (getRadioValue(name)) done += 1;
                 });
 
-                checkGroups.forEach(name => {
+                checkGroups.forEach(function(name) {
                     if (getCheckedValues(name).length > 0) done += 1;
                 });
 
                 const pct = Math.round((done / 15) * 100);
-                progressBar.style.width = pct + "%";
-                completionCounter.textContent = `${done} / 15 Completed (${pct}%)`;
+                if (progressBar) progressBar.style.width = pct + "%";
+                if (completionCounter) completionCounter.textContent = done + " / 15 Completed (" + pct + "%)";
 
-                const q2Val = getRadioValue("q2_dgcc_enrolled");
-                if (q2Val && q2Val.startsWith("Yes")) {
-                    dgccBanner.style.display = "block";
-                    submitBtn.disabled = true;
-                } else {
-                    dgccBanner.style.display = "none";
-                    submitBtn.disabled = false;
-                }
-
-                const q16Boxes = Array.from(form.querySelectorAll(`input[name="q16_top_improvements"]`));
-                const q16Selected = q16Boxes.filter(cb => cb.checked);
-                q16Counter.textContent = `Select top 2 (${q16Selected.length} / 2 selected)`;
-                q16Boxes.forEach(cb => {
+                const q16Boxes = Array.from(form.querySelectorAll('input[name="q16_top_improvements"]'));
+                const q16Selected = q16Boxes.filter(function(cb) { return cb.checked; });
+                if (q16Counter) q16Counter.textContent = "Select top 2 (" + q16Selected.length + " / 2 selected)";
+                q16Boxes.forEach(function(cb) {
                     const tile = cb.closest(".option-tile");
                     if (!cb.checked && q16Selected.length >= 2) {
                         cb.disabled = true;
-                        tile.classList.add("disabled-tile");
+                        if (tile) tile.classList.add("disabled-tile");
                     } else {
                         cb.disabled = false;
-                        tile.classList.remove("disabled-tile");
+                        if (tile) tile.classList.remove("disabled-tile");
                     }
                 });
             }
 
-            form.addEventListener("input", updateProgressAndGates);
-            form.addEventListener("change", updateProgressAndGates);
+            form.addEventListener("input", updateProgress);
+            form.addEventListener("change", updateProgress);
+            updateProgress();
 
             form.addEventListener("submit", async function(e) {
                 e.preventDefault();
-                errorBanner.style.display = "none";
+                if (errorBanner) errorBanner.style.display = "none";
 
                 const payload = {
-                    q1_participant_id: document.getElementById("q1_participant_id").value.trim(),
-                    q2_dgcc_enrolled: getRadioValue("q2_dgcc_enrolled"),
+                    q1_participant_id: (document.getElementById("q1_participant_id") ? document.getElementById("q1_participant_id").value.trim() : ""),
                     q3_occupation: getRadioValue("q3_occupation"),
                     q4_area: getRadioValue("q4_area"),
                     q5_mobile_provider: getRadioValue("q5_mobile_provider"),
@@ -514,7 +492,7 @@
                     q14_price_value_match: getRadioValue("q14_price_value_match"),
                     q15_auto_backup_support: getRadioValue("q15_auto_backup_support"),
                     q16_top_improvements: getCheckedValues("q16_top_improvements"),
-                    q17_memorable_moment: document.getElementById("q17_memorable_moment").value.trim()
+                    q17_memorable_moment: (document.getElementById("q17_memorable_moment") ? document.getElementById("q17_memorable_moment").value.trim() : "")
                 };
 
                 submitBtn.disabled = true;
@@ -528,35 +506,41 @@
                     });
                     const data = await resp.json();
                     if (!resp.ok || !data.ok) {
-                        errorBanner.textContent = data.error || "Submission failed.";
-                        errorBanner.style.display = "block";
-                        errorBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+                        if (errorBanner) {
+                            errorBanner.textContent = data.error || "Submission failed.";
+                            errorBanner.style.display = "block";
+                            errorBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
                         submitBtn.disabled = false;
                         submitBtn.textContent = "Submit Survey Response →";
                         return;
                     }
 
-                    receiptCodeText.textContent = data.receipt_code;
-                    receiptTimeText.textContent = "Recorded at " + data.created_at + " • ID: " + payload.q1_participant_id.toUpperCase();
+                    if (receiptCodeText) receiptCodeText.textContent = data.receipt_code;
+                    if (receiptTimeText) receiptTimeText.textContent = "Recorded at " + data.created_at + " • ID: " + payload.q1_participant_id.toUpperCase();
                     form.style.display = "none";
-                    receiptModal.style.display = "block";
+                    if (receiptModal) receiptModal.style.display = "block";
                     window.scrollTo({ top: 0, behavior: "smooth" });
                 } catch (err) {
-                    errorBanner.textContent = "Network error: Could not reach server.";
-                    errorBanner.style.display = "block";
+                    if (errorBanner) {
+                        errorBanner.textContent = "Network error: Could not reach server.";
+                        errorBanner.style.display = "block";
+                    }
                 } finally {
                     submitBtn.disabled = false;
                     submitBtn.textContent = "Submit Survey Response →";
                 }
             });
 
-            resetFormBtn.addEventListener("click", function() {
-                form.reset();
-                updateProgressAndGates();
-                receiptModal.style.display = "none";
-                form.style.display = "block";
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            });
+            if (resetFormBtn) {
+                resetFormBtn.addEventListener("click", function() {
+                    form.reset();
+                    updateProgress();
+                    if (receiptModal) receiptModal.style.display = "none";
+                    form.style.display = "block";
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                });
+            }
         })();
     </script>
 </body>
