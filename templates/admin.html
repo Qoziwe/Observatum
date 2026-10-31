@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observatum — Live SDG 9 Analytics Dashboard</title>
+    <link rel="stylesheet" href="/static/css/brutalist.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-brand">
+            <span class="sdg-badge">SDG 9 Analytics</span>
+            <span>Observatum • KL Infrastructure Telemetry</span>
+            <span class="ws-pill">
+                <span class="ws-dot" id="wsDot"></span>
+                <span id="wsStatusText">Connecting...</span>
+            </span>
+            <span class="ws-pill" id="listenerCountBadge">Listeners: 1</span>
+        </div>
+
+        <div class="topbar-actions">
+            <a href="/" class="btn-brutal btn-secondary">← Survey</a>
+            <button type="button" id="seedDemoBtn" class="btn-brutal btn-secondary">+25 Demo</button>
+            <button type="button" id="clearDemoBtn" class="btn-brutal btn-secondary">Clear Demo</button>
+            <a href="/admin/export.csv" class="btn-brutal btn-secondary">Export CSV</a>
+            <a href="/admin/export.json" class="btn-brutal btn-secondary">Export JSON</a>
+            <button type="button" id="pauseWsBtn" class="btn-brutal btn-secondary">Pause Live</button>
+            
+            <button type="button" id="resetAllBtn" class="btn-brutal btn-danger">Reset DB</button>
+            <form method="POST" action="/admin/logout" style="display: inline;">
+                <button type="submit" class="btn-brutal btn-secondary">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    <main class="admin-shell">
+        <!-- KPI TELEMETRY STRIP -->
+        <section class="kpi-strip">
+            <div class="kpi-slab">
+                <div class="kpi-code">Total Responses</div>
+                <div class="kpi-value" id="kpiTotal">0</div>
+                <div class="kpi-sub" id="kpiTotalSub">Real: 0 • Demo: 0</div>
+            </div>
+            <div class="kpi-slab">
+                <div class="kpi-code">KL Pain Index</div>
+                <div class="kpi-value" id="kpiPain">0 / 100</div>
+                <div class="kpi-sub">Composite Network Strain</div>
+            </div>
+            <div class="kpi-slab">
+                <div class="kpi-code">Mean Frustration (Q10)</div>
+                <div class="kpi-value" id="kpiFrustration">0.0 / 5.0</div>
+                <div class="kpi-sub" id="kpiFrustrationSub">Median: 0.0 • High: 0%</div>
+            </div>
+            <div class="kpi-slab">
+                <div class="kpi-code">Daily Drops (Q7)</div>
+                <div class="kpi-value" id="kpiDailyDrop">0%</div>
+                <div class="kpi-sub">Once or multiple times/day</div>
+            </div>
+            <div class="kpi-slab">
+                <div class="kpi-code">Phantom Signal (Q8)</div>
+                <div class="kpi-value" id="kpiPhantom">0%</div>
+                <div class="kpi-sub">Full bars, no internet</div>
+            </div>
+            <div class="kpi-slab">
+                <div class="kpi-code">Unfair Price (Q14)</div>
+                <div class="kpi-value" id="kpiUnfairPrice">0%</div>
+                <div class="kpi-sub">Speed below monthly cost</div>
+            </div>
+            <div class="kpi-slab">
+                <div class="kpi-code">Pitch Support (Q15)</div>
+                <div class="kpi-value" id="kpiPitch">0%</div>
+                <div class="kpi-sub" id="kpiPitchSub">Definite Yes: 0%</div>
+            </div>
+        </section>
+
+        <!-- 15 ANALYTICAL CHARTS MATRIX -->
+        <section class="charts-matrix">
+            <div class="chart-card col-8">
+                <div class="chart-head">
+                    <span class="chart-title">1. Multi-Layer Flow: KL Area (Q4) ➔ Mobile Carrier (Q5) ➔ Drop Frequency (Q7)</span>
+                    <span class="chart-tag">Sankey Diagram</span>
+                </div>
+                <div id="chartSankey" class="chart-canvas-lg"></div>
+            </div>
+
+            <div class="chart-card col-4">
+                <div class="chart-head">
+                    <span class="chart-title">2. KL Composite Infrastructure Pain Index</span>
+                    <span class="chart-tag">Gauge 0–100</span>
+                </div>
+                <div id="chartGauge" class="chart-canvas-lg"></div>
+            </div>
+
+            <div class="chart-card col-6">
+                <div class="chart-head">
+                    <span class="chart-title">3. Mobile Provider (Q5) × Disconnection Frequency (Q7)</span>
+                    <span class="chart-tag">2D Heatmap</span>
+                </div>
+                <div id="chartHeatmapMobile" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-6">
+                <div class="chart-head">
+                    <span class="chart-title">4. Mobile Provider Users (Q5) vs Mean Frustration (Q10)</span>
+                    <span class="chart-tag">Dual Benchmark</span>
+                </div>
+                <div id="chartMobileFrustration" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-6">
+                <div class="chart-head">
+                    <span class="chart-title">5. Fixed Broadband (Q6) × Price-to-Stability Match (Q14)</span>
+                    <span class="chart-tag">Stacked Bar</span>
+                </div>
+                <div id="chartBroadbandValue" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-6">
+                <div class="chart-head">
+                    <span class="chart-title">6. Klang Valley Regional Vulnerability by Area (Q4)</span>
+                    <span class="chart-tag">Geo Comparison</span>
+                </div>
+                <div id="chartAreaVulnerability" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-8">
+                <div class="chart-head">
+                    <span class="chart-title">7. Worst Connection Drop Conditions &amp; Triggers (Q9)</span>
+                    <span class="chart-tag">Pareto Curve</span>
+                </div>
+                <div id="chartParetoQ9" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-4">
+                <div class="chart-head">
+                    <span class="chart-title">8. "Full Signal, No Internet" Phenomenon (Q8)</span>
+                    <span class="chart-tag">Rose Chart</span>
+                </div>
+                <div id="chartPhantomSignal" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-4">
+                <div class="chart-head">
+                    <span class="chart-title">9. Frustration Scale Distribution 1–5 (Q10)</span>
+                    <span class="chart-tag">Histogram</span>
+                </div>
+                <div id="chartFrustrationDist" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-4">
+                <div class="chart-head">
+                    <span class="chart-title">10. Impacted Daily Activities Radar (Q11)</span>
+                    <span class="chart-tag">6-Axis Radar</span>
+                </div>
+                <div id="chartImpactRadar" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-4">
+                <div class="chart-head">
+                    <span class="chart-title">11. User Coping Mechanisms (Q12)</span>
+                    <span class="chart-tag">Ranked Bar</span>
+                </div>
+                <div id="chartCopingBar" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-4">
+                <div class="chart-head">
+                    <span class="chart-title">12. Step 9 Pitch: Auto 5G Backup / Rebate (Q15)</span>
+                    <span class="chart-tag">Donut Chart</span>
+                </div>
+                <div id="chartPitchQ15" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-8">
+                <div class="chart-head">
+                    <span class="chart-title">13. Step 9 Pitch: Top-2 Wanted Telecom Improvements (Q16)</span>
+                    <span class="chart-tag">Priority Rank</span>
+                </div>
+                <div id="chartPitchQ16" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-8">
+                <div class="chart-head">
+                    <span class="chart-title">14. Customer Support / AI Chatbot (Q13) × Price Fairness (Q14)</span>
+                    <span class="chart-tag">Correlation Matrix</span>
+                </div>
+                <div id="chartSupportHeatmap" class="chart-canvas"></div>
+            </div>
+
+            <div class="chart-card col-4">
+                <div class="chart-head">
+                    <span class="chart-title">15. Respondent Occupation in KL (Q3)</span>
+                    <span class="chart-tag">Demographics</span>
+                </div>
+                <div id="chartOccupation" class="chart-canvas"></div>
+            </div>
+
+            <!-- QUALITATIVE STORIES WALL (Q17) -->
+            <div class="chart-card col-12">
+                <div class="chart-head">
+                    <span class="chart-title">16. Memorable Outage Stories in Kuala Lumpur (Q17)</span>
+                    <span class="chart-tag">Live Feed</span>
+                </div>
+                <div id="storiesContainer" class="stories-grid"></div>
+            </div>
+
+            <!-- ACADEMIC VERIFICATION REGISTRY TABLE -->
+            <div class="chart-card col-12">
+                <div class="chart-head">
+                    <span class="chart-title">17. Academic Verification Registry (Recent Submissions)</span>
+                    <span class="chart-tag">Audit Table</span>
+                </div>
+                <div class="table-scroll">
+                    <table class="brutal-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Receipt</th>
+                                <th>Participant ID (Q1)</th>
+                                <th>Type</th>
+                                <th>Occupation (Q3)</th>
+                                <th>KL Zone (Q4)</th>
+                                <th>Mobile (Q5)</th>
+                                <th>Broadband (Q6)</th>
+                                <th>Drop Freq (Q7)</th>
+                                <th>Stress (Q10)</th>
+                                <th>Pitch Q15</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="responsesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        window.__INITIAL_PAYLOAD__ = {{ initial_payload | tojson }};
+    </script>
+    <script src="/static/js/socket.io.min.js"></script>
+    <script src="/static/js/echarts.min.js"></script>
+    <script src="/static/js/admin_dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observatum — KL Urban Digital Infrastructure Survey (SDG 9)</title>
+    <link rel="stylesheet" href="/static/css/brutalist.css">
+</head>
+<body>
+    <div class="progress-rail">
+        <div class="progress-fill" id="progressBar"></div>
+    </div>
+
+    <header class="topbar">
+        <div class="topbar-brand">
+            <span class="sdg-badge">UN SDG 9</span>
+            <span>Observatum • KL Connectivity Experience</span>
+        </div>
+        <div class="topbar-actions">
+            <span class="ws-pill" id="completionCounter">0 / 15 Completed</span>
+            
+            
+        </div>
+    </header>
+
+    <main class="shell">
+        <section class="monolith-header">
+            <div class="monolith-meta-row">
+                <span>Asia Pacific University (APU)</span>
+                <span>Kuala Lumpur / Klang Valley</span>
+                <span>UN SDG 9 Research</span>
+            </div>
+            <h1 class="monolith-title">{{ meta.title }}</h1>
+            <p class="monolith-desc">{{ meta.description }}</p>
+            
+        </section>
+
+        
+
+        <div id="errorBanner" class="gate-alert"></div>
+
+        <section id="receiptModal" class="monolith-header" style="display: none;">
+            <div class="monolith-meta-row">
+                <span>Submission Confirmed</span>
+                <span>Verified</span>
+            </div>
+            <h2 class="monolith-title" style="font-size: 1.85rem;">Thank you for your response!</h2>
+            <p class="monolith-desc">
+                Your survey response has been saved to the APU SDG 9 Urban Digital Infrastructure dataset.
+            </p>
+            <div class="q-block" style="margin: 22px 0;">
+                <div class="q-num" style="display: inline-block; margin-bottom: 8px;">Verification Receipt Code</div>
+                <div id="receiptCodeText" style="font-family: var(--font-mono); font-size: 1.8rem; font-weight: 700; color: var(--cyan);">SDG9-KL-000000</div>
+                <div id="receiptTimeText" style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-muted); margin-top: 6px;"></div>
+            </div>
+            <div>
+                <button type="button" id="resetFormBtn" class="btn-brutal btn-secondary">Submit Another Response</button>
+            </div>
+        </section>
+
+        <form id="surveyForm" novalidate>
+            <!-- SECTION 1 -->
+            <section class="section-slab">
+                <div class="section-banner">
+                    <span class="section-banner-title">Section 1: Verification &amp; Demographics</span>
+                    <span class="section-banner-code">Questions 1 – 3</span>
+                </div>
+                <div class="section-body">
+                    <!-- Q1 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 1</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">1. Identification Number (APU Student ID or IC/Passport Suffix for Non-APU participants)</div>
+                        <div class="q-helper">Used strictly for academic verification purposes (e.g., TP0XXXXX).</div>
+                        <input
+                            type="text"
+                            name="q1_participant_id"
+                            id="q1_participant_id"
+                            class="text-input"
+                            placeholder="e.g., TP071234 or IC-8821"
+                            maxlength="64"
+                            required
+                        >
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 2</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">2. What is your current occupation/status in Kuala Lumpur?</div>
+                        <div class="options-grid">
+                            {% for opt in options["q3_occupation"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q3_occupation" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q4 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 3</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">3. Which area of Kuala Lumpur / Klang Valley do you primarily live or commute in?</div>
+                        <div class="options-grid">
+                            {% for opt in options["q4_area"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q4_area" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2 -->
+            <section class="section-slab">
+                <div class="section-banner">
+                    <span class="section-banner-title">Section 2: Telecom Provider Profile</span>
+                    <span class="section-banner-code">Questions 4 – 5</span>
+                </div>
+                <div class="section-body">
+                    <!-- Q5 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 4</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">4. Which Mobile Network Provider do you primarily use? (Select main SIM)</div>
+                        <div class="options-grid">
+                            {% for opt in options["q5_mobile_provider"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q5_mobile_provider" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q6 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 5</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">5. Which Fixed Home/Campus Broadband (Wi-Fi) Provider do you primarily use?</div>
+                        <div class="options-grid">
+                            {% for opt in options["q6_broadband_provider"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q6_broadband_provider" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3 -->
+            <section class="section-slab">
+                <div class="section-banner">
+                    <span class="section-banner-title">Section 3: Frequency &amp; Technical Nature of the Issue</span>
+                    <span class="section-banner-code">Questions 6 – 8</span>
+                </div>
+                <div class="section-body">
+                    <!-- Q7 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 6</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">6. How often do you experience sudden network disconnections or unstable internet speeds in Kuala Lumpur?</div>
+                        <div class="options-grid">
+                            {% for opt in options["q7_disconnect_freq"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q7_disconnect_freq" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q8 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 7</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">7. Have you experienced the "Full Signal, No Internet" phenomenon (where your device shows full 4G/5G or Wi-Fi bars, but web pages/apps fail to load)?</div>
+                        <div class="options-grid">
+                            {% for opt in options["q8_phantom_signal"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q8_phantom_signal" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q9 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 8</span>
+                            <span class="q-req">Checkboxes • Select all that apply</span>
+                        </div>
+                        <div class="q-title">8. When do you experience the worst connection drops and speed throttling? (Select all that apply)</div>
+                        <div class="options-grid">
+                            {% for opt in options["q9_worst_conditions"] %}
+                            <label class="option-tile">
+                                <input type="checkbox" name="q9_worst_conditions" value="{{ opt }}">
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4 -->
+            <section class="section-slab">
+                <div class="section-banner">
+                    <span class="section-banner-title">Section 4: Emotional Impact, Frustration &amp; Daily Difficulties</span>
+                    <span class="section-banner-code">Questions 9 – 13</span>
+                </div>
+                <div class="section-body">
+                    <!-- Q10 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 9</span>
+                            <span class="q-req">Scale 1 to 5 • Required</span>
+                        </div>
+                        <div class="q-title">9. On a scale of 1 to 5, how frustrated or annoyed do you feel when your internet connection drops or slows down during daily tasks?</div>
+                        <div class="scale-wrap">
+                            <div class="scale-row">
+                                {% for n in [1, 2, 3, 4, 5] %}
+                                <label class="scale-tile">
+                                    <input type="radio" name="q10_frustration_scale" value="{{ n }}" required>
+                                    <span>{{ n }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <div class="scale-Captions">
+                                <span>1 = Not frustrated at all</span>
+                                <span>5 = Extremely frustrated and stressed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q11 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 10</span>
+                            <span class="q-req">Checkboxes • Select all that apply</span>
+                        </div>
+                        <div class="q-title">10. Which of your daily activities have been negatively impacted by bad internet connections in KL? (Select all that apply)</div>
+                        <div class="options-grid">
+                            {% for opt in options["q11_impacted_activities"] %}
+                            <label class="option-tile">
+                                <input type="checkbox" name="q11_impacted_activities" value="{{ opt }}">
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q12 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 11</span>
+                            <span class="q-req">Checkboxes • Select all that apply</span>
+                        </div>
+                        <div class="q-title">11. How have you had to cope with sudden Wi-Fi or mobile network failures? (Select all that apply)</div>
+                        <div class="options-grid">
+                            {% for opt in options["q12_coping_mechanisms"] %}
+                            <label class="option-tile">
+                                <input type="checkbox" name="q12_coping_mechanisms" value="{{ opt }}">
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q13 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 12</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">12. If you have ever contacted your provider’s Customer Support (or AI Chatbot) regarding network issues, how satisfied were you with their response?</div>
+                        <div class="options-grid">
+                            {% for opt in options["q13_support_satisfaction"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q13_support_satisfaction" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q14 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 13</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">13. Do you feel that the actual internet stability and speed you receive match the price you pay every month?</div>
+                        <div class="options-grid">
+                            {% for opt in options["q14_price_value_match"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q14_price_value_match" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5 -->
+            <section class="section-slab">
+                <div class="section-banner">
+                    <span class="section-banner-title">Section 5: Feedback on Proposed Solutions (For Step 9 Pitch)</span>
+                    <span class="section-banner-code">Questions 14 – 16</span>
+                </div>
+                <div class="section-body">
+                    <!-- Q15 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 14</span>
+                            <span class="q-req">Required</span>
+                        </div>
+                        <div class="q-title">14. Would you support a feature where your telecom provider automatically gives you free emergency 5G/4G backup data (or an automatic bill discount/rebate) whenever your main internet line disconnects or drops below promised speeds?</div>
+                        <div class="options-grid">
+                            {% for opt in options["q15_auto_backup_support"] %}
+                            <label class="option-tile">
+                                <input type="radio" name="q15_auto_backup_support" value="{{ opt }}" required>
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q16 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 15</span>
+                            <span class="q-req" id="q16Counter">Select top 2 (0 / 2 selected)</span>
+                        </div>
+                        <div class="q-title">15. Which improvement would you most like to see from telecom companies in Kuala Lumpur? (Select top 2)</div>
+                        <div class="options-grid" id="q16Grid">
+                            {% for opt in options["q16_top_improvements"] %}
+                            <label class="option-tile">
+                                <input type="checkbox" name="q16_top_improvements" value="{{ opt }}">
+                                <span>{{ opt }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Q17 -->
+                    <div class="q-block">
+                        <div class="q-head">
+                            <span class="q-num">Question 16</span>
+                            <span class="q-req">Optional</span>
+                        </div>
+                        <div class="q-title">16. (Optional) Briefly share one memorable or frustrating moment when bad internet connection ruined something important for you in KL:</div>
+                        <textarea
+                            name="q17_memorable_moment"
+                            id="q17_memorable_moment"
+                            class="textarea-input"
+                            placeholder="Share your experience..."
+                        ></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; padding-top: 8px;">
+                        <span style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--ink-muted);">
+                            Zero-Drain HTTP Commit • SQLite WAL
+                        </span>
+                        <button type="submit" id="submitBtn" class="btn-brutal">
+                            Submit Survey Response →
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </form>
+    </main>
+
+    <script>
+        (function() {
+            const savedTheme = "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+            const themeBtn = document.getElementById("themeBtn");
+            themeBtn.textContent = savedTheme === "dark" ? "Theme: Dark" : "Theme: Light";
+            themeBtn.addEventListener("click", function() {
+                const cur = document.documentElement.getAttribute("data-theme");
+                const next = cur === "dark" ? "light" : "dark";
+                document.documentElement.setAttribute("data-theme", next);
+                localStorage.setItem("observatum_bento_theme", next);
+                themeBtn.textContent = next === "dark" ? "Theme: Dark" : "Theme: Light";
+            });
+
+            const form = document.getElementById("surveyForm");
+            const submitBtn = document.getElementById("submitBtn");
+            const dgccBanner = document.getElementById("dgccGateBanner");
+            const errorBanner = document.getElementById("errorBanner");
+            const progressBar = document.getElementById("progressBar");
+            const completionCounter = document.getElementById("completionCounter");
+            const q16Counter = document.getElementById("q16Counter");
+            const receiptModal = document.getElementById("receiptModal");
+            const receiptCodeText = document.getElementById("receiptCodeText");
+            const receiptTimeText = document.getElementById("receiptTimeText");
+            const resetFormBtn = document.getElementById("resetFormBtn");
+
+            const radioGroups = [
+                
+                "q3_occupation",
+                "q4_area",
+                "q5_mobile_provider",
+                "q6_broadband_provider",
+                "q7_disconnect_freq",
+                "q8_phantom_signal",
+                "q10_frustration_scale",
+                "q13_support_satisfaction",
+                "q14_price_value_match",
+                "q15_auto_backup_support"
+            ];
+
+            const checkGroups = [
+                "q9_worst_conditions",
+                "q11_impacted_activities",
+                "q12_coping_mechanisms",
+                "q16_top_improvements"
+            ];
+
+            function getCheckedValues(name) {
+                return Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+            }
+
+            function getRadioValue(name) {
+                const el = form.querySelector(`input[name="${name}"]:checked`);
+                return el ? el.value : "";
+            }
+
+            function updateProgressAndGates() {
+                let done = 0;
+                const q1Val = document.getElementById("q1_participant_id").value.trim();
+                if (q1Val.length >= 2) done += 1;
+
+                radioGroups.forEach(name => {
+                    if (getRadioValue(name)) done += 1;
+                });
+
+                checkGroups.forEach(name => {
+                    if (getCheckedValues(name).length > 0) done += 1;
+                });
+
+                const pct = Math.round((done / 15) * 100);
+                progressBar.style.width = pct + "%";
+                completionCounter.textContent = `${done} / 15 Completed (${pct}%)`;
+
+                const q2Val = getRadioValue("q2_dgcc_enrolled");
+                if (q2Val && q2Val.startsWith("Yes")) {
+                    dgccBanner.style.display = "block";
+                    submitBtn.disabled = true;
+                } else {
+                    dgccBanner.style.display = "none";
+                    submitBtn.disabled = false;
+                }
+
+                const q16Boxes = Array.from(form.querySelectorAll(`input[name="q16_top_improvements"]`));
+                const q16Selected = q16Boxes.filter(cb => cb.checked);
+                q16Counter.textContent = `Select top 2 (${q16Selected.length} / 2 selected)`;
+                q16Boxes.forEach(cb => {
+                    const tile = cb.closest(".option-tile");
+                    if (!cb.checked && q16Selected.length >= 2) {
+                        cb.disabled = true;
+                        tile.classList.add("disabled-tile");
+                    } else {
+                        cb.disabled = false;
+                        tile.classList.remove("disabled-tile");
+                    }
+                });
+            }
+
+            form.addEventListener("input", updateProgressAndGates);
+            form.addEventListener("change", updateProgressAndGates);
+
+            form.addEventListener("submit", async function(e) {
+                e.preventDefault();
+                errorBanner.style.display = "none";
+
+                const payload = {
+                    q1_participant_id: document.getElementById("q1_participant_id").value.trim(),
+                    q2_dgcc_enrolled: getRadioValue("q2_dgcc_enrolled"),
+                    q3_occupation: getRadioValue("q3_occupation"),
+                    q4_area: getRadioValue("q4_area"),
+                    q5_mobile_provider: getRadioValue("q5_mobile_provider"),
+                    q6_broadband_provider: getRadioValue("q6_broadband_provider"),
+                    q7_disconnect_freq: getRadioValue("q7_disconnect_freq"),
+                    q8_phantom_signal: getRadioValue("q8_phantom_signal"),
+                    q9_worst_conditions: getCheckedValues("q9_worst_conditions"),
+                    q10_frustration_scale: parseInt(getRadioValue("q10_frustration_scale") || "0", 10),
+                    q11_impacted_activities: getCheckedValues("q11_impacted_activities"),
+                    q12_coping_mechanisms: getCheckedValues("q12_coping_mechanisms"),
+                    q13_support_satisfaction: getRadioValue("q13_support_satisfaction"),
+                    q14_price_value_match: getRadioValue("q14_price_value_match"),
+                    q15_auto_backup_support: getRadioValue("q15_auto_backup_support"),
+                    q16_top_improvements: getCheckedValues("q16_top_improvements"),
+                    q17_memorable_moment: document.getElementById("q17_memorable_moment").value.trim()
+                };
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Submitting...";
+
+                try {
+                    const resp = await fetch("/api/submit", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok || !data.ok) {
+                        errorBanner.textContent = data.error || "Submission failed.";
+                        errorBanner.style.display = "block";
+                        errorBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "Submit Survey Response →";
+                        return;
+                    }
+
+                    receiptCodeText.textContent = data.receipt_code;
+                    receiptTimeText.textContent = "Recorded at " + data.created_at + " • ID: " + payload.q1_participant_id.toUpperCase();
+                    form.style.display = "none";
+                    receiptModal.style.display = "block";
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                } catch (err) {
+                    errorBanner.textContent = "Network error: Could not reach server.";
+                    errorBanner.style.display = "block";
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Submit Survey Response →";
+                }
+            });
+
+            resetFormBtn.addEventListener("click", function() {
+                form.reset();
+                updateProgressAndGates();
+                receiptModal.style.display = "none";
+                form.style.display = "block";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        })();
+    </script>
+</body>
+</html>
